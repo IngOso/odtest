@@ -31,23 +31,59 @@ main(int argc, char **argv)
     char *file = NULL;
     unsigned char buff[16];
 
-    {
-        printf ("Usage: %s <file>\n", argv[0]);
-        exit (1);
-    }
+    unsigned int RowOffset = 0u;	//This variable indicate the offset to read the bytes
+    unsigned int PrintIndex;		//This variable is use to indicate the position to print the string
+    struct stat S_FILE_INFO;		//Structure to determine file size.
+    size_t* Length;					//This variable contains size of the file
+    unsigned long Counter = 0u;		//This variable is a counter for bytes printed
+
+	    if(argc != 2)
+	    {
+		printf ("Usage: %s <file>\n", argv[0]);
+		exit (1);
+	    }
 
     file = argv[1];
 
     fd = open(file, O_RDONLY);
 
-    if(fd < 0)
-    {
-        printf ("Error");
-        exit(1);
-    }
+	    if(fd < 0)
+	    {
+		printf ("Error");
+		exit(1);
+	    }
 
-    /* Print complete file content following od hex format */
-    /* od -A x -t x1z -v file.dat */
+    // The purpose of this program is emulate the behaviour of Od command for the format: "od -A x -t x1z -v file.dat".  
+    fstat(fd,&S_FILE_INFO);				//Get file status.
+    *Length = S_FILE_INFO.st_size;		//Get file length.
+	
+    while(RowOffset < *Length)			//print until counter will reach file size.
+    {
+	    pread(fd,buff,AMOUNT_OF_CHAR,RowOffset);	//Read 16 symbols and save into buffer.
+	    printf("%06x ",RowOffset);					//Print start address.
+
+	    
+	    for(PrintIndex = 0; PrintIndex < AMOUNT_OF_CHAR; PrintIndex++)//Read and process one row.
+	    {
+			if(Counter >= *Length) //Counter value is greater than length?
+			{//Yes-->
+				printf("   ");				//Print empty.
+				buff[PrintIndex] = ' ';		//Clear buffer position.
+			}
+			else
+			{//No->
+				
+				printf("%02x ",buff[PrintIndex]);//Print the hex converted symbols.
+				if(buff[PrintIndex] == 0x0A)// Is symbol next line??
+				{//Yes->
+					buff[PrintIndex] = '.';//Print "." instead on next line.
+				}
+				Counter++;//Increment counter.
+			}
+	    }
+	    printf(">%s<\n",buff);//Print current row.
+	    RowOffset = RowOffset + AMOUNT_OF_CHAR;//Increase the offset value to read the next line.
+    } 
 
     close (fd);
 
