@@ -22,6 +22,8 @@
 #include <fcntl.h>
 #include <ctype.h>
 
+#define   AMOUNT_OF_CHAR  16u    //Defines indicate amount of characters to process.
+
 int
 main(int argc, char **argv)
 {
