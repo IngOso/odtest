@@ -31,7 +31,6 @@ main(int argc, char **argv)
     char *file = NULL;
     unsigned char buff[16];
 
-    if(argc != 2)
     {
         printf ("Usage: %s <file>\n", argv[0]);
         exit (1);
